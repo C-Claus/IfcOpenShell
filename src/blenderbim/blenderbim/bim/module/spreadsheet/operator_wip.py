@@ -1,11 +1,27 @@
 import bpy
 import pandas
+import ifcopenshell.api
+#import blenderbim
+#import blenderbim.bim.import_ifc
+#from blenderbim.bim.ifc import IfcStore
 
-#construct pandas dataframe
-#extract ifc data 
 
 def get_ifc_type(self, ifc_product):
     print ('get ifc type')
+
+    ifc_type_list = []
+    
+    if ifc_product: 
+        ifcproduct_type = ifcopenshell.util.element.get_type(ifc_product)
+        
+        if ifcproduct_type:
+            ifc_type_list.append(ifcproduct_type.Name)
+    
+    if not ifc_type_list:
+        ifc_type_list.append(None)
+
+    
+    return ifc_type_list
 
 def get_ifc_building_storey(self, ifc_product):
     print ('get ifc building storey')
@@ -22,11 +38,20 @@ def get_ifc_properties(self, ifc_product):
 def get_ifc_quantities(self, ifc_product):
     print ('get ifc quantities')
 
-def get_custom_propertyset(self, ifc_product):
+def get_ifc_custom_propertyset(self, ifc_product):
     print ('get ifc custom properties')
 
 
+class ConstructPandasDataFrame(bpy.types.Operator):
+
+    def execute():
+        print (' execute')
 class WriteToXLSX(bpy.types.Operator):
+
+    def execute():
+        print (' execute')
+
+class WriteToODS(bpy.types.Operator):
 
     def execute():
         print (' execute')
