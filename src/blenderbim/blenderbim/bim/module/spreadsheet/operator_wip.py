@@ -1,14 +1,25 @@
 import bpy
 import pandas
+
+import ifcopenshell
 import ifcopenshell.api
-#import blenderbim
+import ifcopenshell.util.element
+
+import blenderbim
 #import blenderbim.bim.import_ifc
 #from blenderbim.bim.ifc import IfcStore
 
+ifc_file_location = "C:\\Algemeen\\07_ifcopenshell\\00_ifc\\02_ifc_library\\IFC Schependomlaan.ifc"
 
-def get_ifc_type(self, ifc_product):
-    print ('get ifc type')
+ifc_file = ifcopenshell.open(ifc_file_location)
 
+products = ifc_file.by_type('IfcProduct')
+
+
+
+
+def get_ifc_type(ifc_product):
+    
     ifc_type_list = []
     
     if ifc_product: 
@@ -20,11 +31,25 @@ def get_ifc_type(self, ifc_product):
     if not ifc_type_list:
         ifc_type_list.append(None)
 
-    
     return ifc_type_list
 
-def get_ifc_building_storey(self, ifc_product):
-    print ('get ifc building storey')
+
+def get_ifc_building_storey(ifc_product):
+
+    building_storey_list = []
+        
+    spatial_container = ifcopenshell.util.element.get_container(ifc_product)
+    
+    if spatial_container:    
+        building_storey_list.append(spatial_container.Name)
+        
+    if not building_storey_list:
+        building_storey_list.append(None)
+         
+    return building_storey_list 
+
+for product in products:
+    get_ifc_building_storey(ifc_product=product)
 
 def get_ifc_classification_item_and_reference(self, ifc_product):
     print ('get ifc classifcation and reference')
