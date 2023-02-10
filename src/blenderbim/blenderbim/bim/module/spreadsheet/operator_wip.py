@@ -69,8 +69,7 @@ def get_ifc_classification_item_and_reference(ifc_product):
 def get_ifc_materials(ifc_product):
     
     material_list = []
-    
-    
+     
     if ifc_product:
         ifc_material = ifcopenshell.util.element.get_material(ifc_product)
         if ifc_material:
@@ -100,8 +99,35 @@ def get_ifc_materials(ifc_product):
     return material_list
     
 
-def get_ifc_properties(self, ifc_product):
-    print ('get ifc propetysets and properties')
+def get_ifc_properties(ifc_product):
+    #print ('get ifc propetysets and properties')
+    
+    property_set_common_list = []
+    property_name = 'IsExternal'
+    
+    #IsExternal
+    #LoadBearing
+    #FireRating
+    #AcousticRating
+    #Compartmentation
+    
+    if ifc_product:
+        if ifc_product.IsDefinedBy:
+            for ifc_reldefinesbyproperties in ifc_product.IsDefinedBy:
+                if ifc_reldefinesbyproperties.is_a() == 'IfcRelDefinesByProperties':
+                    if ifc_reldefinesbyproperties.RelatingPropertyDefinition.is_a() == 'IfcPropertySet':
+                        if (ifc_reldefinesbyproperties.RelatingPropertyDefinition.Name).startswith('Pset_') and (ifc_reldefinesbyproperties.RelatingPropertyDefinition.Name).endswith('Common'):
+                            for ifc_property in ifc_reldefinesbyproperties.RelatingPropertyDefinition.HasProperties:
+                                
+                                if ifc_property.Name == property_name:
+                                    if ifc_property.NominalValue:
+                                        property_set_common_list.append(ifc_property.NominalValue[0])
+    if not property_set_common_list:
+        property_set_common_list.append(None)
+        
+
+    return (property_set_common_list)                                   
+
 
 def get_ifc_quantities(self, ifc_product):
     print ('get ifc quantities')
