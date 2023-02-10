@@ -61,25 +61,15 @@ def get_ifc_classification_item_and_reference(ifc_product):
             classification_list.append(str(system.Name) + ' | ' + str(reference[1]) +  ' | ' + str(reference[2]))
         
     if not classification_list:
-        classification_list.append(None)    
-    print (classification_list)
+        classification_list.append(None)  
+          
+    return (classification_list)
     
     
-
-
 def get_ifc_materials(ifc_product):
     
     material_list = []
     
-    #deprecated from IFC2x3
-    #IfcMaterialList
-
-    #IfcMaterialLayerSet
-    #IfcMaterialLayerSetUsage
-
-    #new entity from IFC4
-    #IfcMaterialConstituentSet
-    #IfcMaterialProfileSet
     
     if ifc_product:
         ifc_material = ifcopenshell.util.element.get_material(ifc_product)
@@ -109,9 +99,6 @@ def get_ifc_materials(ifc_product):
         
     return material_list
     
-    
-for product in products:
-    get_ifc_materials(ifc_product=product)
 
 def get_ifc_properties(self, ifc_product):
     print ('get ifc propetysets and properties')
