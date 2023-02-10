@@ -5,19 +5,17 @@ import ifcopenshell
 import ifcopenshell.api
 import ifcopenshell.util.element
 import ifcopenshell.util.classification
+#import ifcopenshell.util.material
 
 import blenderbim
 #import blenderbim.bim.import_ifc
 #from blenderbim.bim.ifc import IfcStore
 
 ifc_file_location = "C:\\Algemeen\\07_ifcopenshell\\00_ifc\\02_ifc_library\\IFC Schependomlaan.ifc"
-
+#ifc_file_location = "C:\\Algemeen\\07_ifcopenshell\\00_ifc\\02_ifc_library\\IFC4 demo.ifc"
 ifc_file = ifcopenshell.open(ifc_file_location)
 
 products = ifc_file.by_type('IfcProduct')
-
-
-
 
 def get_ifc_type(ifc_product):
     
@@ -50,7 +48,6 @@ def get_ifc_building_storey(ifc_product):
     return building_storey_list 
 
 
-
 def get_ifc_classification_item_and_reference(ifc_product):
     
     classification_list = []
@@ -60,10 +57,7 @@ def get_ifc_classification_item_and_reference(ifc_product):
     
     if ifc_product:
         for reference in references:
-           
             system = ifcopenshell.util.classification.get_classification(reference)
-           
-            
             classification_list.append(str(system.Name) + ' | ' + str(reference[1]) +  ' | ' + str(reference[2]))
         
     if not classification_list:
@@ -71,11 +65,53 @@ def get_ifc_classification_item_and_reference(ifc_product):
     print (classification_list)
     
     
-for product in products:
-    get_ifc_classification_item_and_reference(ifc_product=product)
 
-def get_ifc_materials(self, ifc_product):
-    print ('get ifc materials')
+
+def get_ifc_materials(ifc_product):
+    
+    material_list = []
+    
+    #deprecated from IFC2x3
+    #IfcMaterialList
+
+    #IfcMaterialLayerSet
+    #IfcMaterialLayerSetUsage
+
+    #new entity from IFC4
+    #IfcMaterialConstituentSet
+    #IfcMaterialProfileSet
+    
+    if ifc_product:
+        ifc_material = ifcopenshell.util.element.get_material(ifc_product)
+        if ifc_material:
+            
+            if ifc_material.is_a('IfcMaterial'):
+                material_list.append(ifc_material.Name)
+            
+            if ifc_material.is_a('IfcMaterialList'):
+                for materials in ifc_material.Materials:
+                   material_list.append(materials.Name)
+            
+            if ifc_material.is_a('IfcMaterialConstituentSet'):
+                for material_constituents in ifc_material.MaterialConstituents:
+                    material_list.append(material_constituents.Material.Name)
+            
+            if ifc_material.is_a('IfcMaterialLayerSetUsage'):
+                for material_layer in ifc_material.ForLayerSet.MaterialLayers:
+                    material_list.append(material_layer.Material.Name)
+                
+            if ifc_material.is_a('IfcMaterialProfileSetUsage'):
+                for material_profile in (ifc_material.ForProfileSet.MaterialProfiles):
+                    material_list.append(material_profile.Material.Name)
+    
+    if not material_list:
+        material_list.append(None)
+        
+    return material_list
+    
+    
+for product in products:
+    get_ifc_materials(ifc_product=product)
 
 def get_ifc_properties(self, ifc_product):
     print ('get ifc propetysets and properties')
