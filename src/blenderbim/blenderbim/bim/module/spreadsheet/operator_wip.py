@@ -4,6 +4,7 @@ import pandas
 import ifcopenshell
 import ifcopenshell.api
 import ifcopenshell.util.element
+import ifcopenshell.util.classification
 
 import blenderbim
 #import blenderbim.bim.import_ifc
@@ -48,11 +49,30 @@ def get_ifc_building_storey(ifc_product):
          
     return building_storey_list 
 
-for product in products:
-    get_ifc_building_storey(ifc_product=product)
 
-def get_ifc_classification_item_and_reference(self, ifc_product):
-    print ('get ifc classifcation and reference')
+
+def get_ifc_classification_item_and_reference(ifc_product):
+    
+    classification_list = []
+
+    # Elements may have multiple classification references assigned
+    references = ifcopenshell.util.classification.get_references(ifc_product)
+    
+    if ifc_product:
+        for reference in references:
+           
+            system = ifcopenshell.util.classification.get_classification(reference)
+           
+            
+            classification_list.append(str(system.Name) + ' | ' + str(reference[1]) +  ' | ' + str(reference[2]))
+        
+    if not classification_list:
+        classification_list.append(None)    
+    print (classification_list)
+    
+    
+for product in products:
+    get_ifc_classification_item_and_reference(ifc_product=product)
 
 def get_ifc_materials(self, ifc_product):
     print ('get ifc materials')
