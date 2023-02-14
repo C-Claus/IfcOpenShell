@@ -111,6 +111,8 @@ def get_ifc_properties(ifc_product):
     #AcousticRating
     #Compartmentation
     
+    #netside_area = ifcopenshell.util.element.get_pset(ifc_product, "Pset_WallCommon","IsExternal")
+    
     if ifc_product:
         if ifc_product.IsDefinedBy:
             for ifc_reldefinesbyproperties in ifc_product.IsDefinedBy:
@@ -122,6 +124,7 @@ def get_ifc_properties(ifc_product):
                                 if ifc_property.Name == property_name:
                                     if ifc_property.NominalValue:
                                         property_set_common_list.append(ifc_property.NominalValue[0])
+                                        
     if not property_set_common_list:
         property_set_common_list.append(None)
         
@@ -129,8 +132,24 @@ def get_ifc_properties(ifc_product):
     return (property_set_common_list)                                   
 
 
-def get_ifc_quantities(self, ifc_product):
-    print ('get ifc quantities')
+def get_ifc_quantities(ifc_product):
+    #print ('get ifc quantities')
+    
+
+    
+    area = ifcopenshell.util.element.get_pset(ifc_product, "BaseQuantities","Area") 
+    netside_area = ifcopenshell.util.element.get_pset(ifc_product, "BaseQuantities","NetSideArea") 
+    
+ 
+    
+    print (ifc_product.Name, area)
+
+
+
+for product in products:
+    get_ifc_quantities(ifc_product=product)
+
+
 
 def get_ifc_custom_propertyset(self, ifc_product):
     print ('get ifc custom properties')
@@ -140,6 +159,8 @@ class ConstructPandasDataFrame(bpy.types.Operator):
 
     def execute():
         print (' execute')
+        
+        
 class WriteToXLSX(bpy.types.Operator):
 
     def execute():
