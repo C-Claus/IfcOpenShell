@@ -358,6 +358,8 @@ class ConstructDataFrame:
         
         quantity_list = []
         length_value_list = ['Length','Width','Height','Perimeter']
+
+        #qsets = ifcopenshell.util.element.get_psets(element, qtos_only=True)
         
         for properties in ifcproduct.IsDefinedBy:
             if properties.is_a('IfcRelDefinesByProperties'):
