@@ -1,5 +1,7 @@
 import bpy
 import pandas
+import collections
+from collections import defaultdict
 
 import ifcopenshell
 import ifcopenshell.api
@@ -10,6 +12,8 @@ import ifcopenshell.util.classification
 import blenderbim
 #import blenderbim.bim.import_ifc
 #from blenderbim.bim.ifc import IfcStore
+
+import pandas as pd
 
 ifc_file_location = "C:\\Algemeen\\07_ifcopenshell\\00_ifc\\02_ifc_library\\IFC Schependomlaan.ifc"
 #ifc_file_location = "C:\\Algemeen\\07_ifcopenshell\\00_ifc\\02_ifc_library\\IFC4 demo.ifc"
@@ -23,7 +27,7 @@ def get_ifc_type(ifc_product):
     
     if ifc_product: 
         ifcproduct_type = ifcopenshell.util.element.get_type(ifc_product)
-        
+ 
         if ifcproduct_type:
             ifc_type_list.append(ifcproduct_type.Name)
     
@@ -133,33 +137,61 @@ def get_ifc_properties(ifc_product):
 
 
 def get_ifc_quantities(ifc_product):
-    #print ('get ifc quantities')
+  
+    quantity_list  = []
     
-
-    
-    area = ifcopenshell.util.element.get_pset(ifc_product, "BaseQuantities","Area") 
-    netside_area = ifcopenshell.util.element.get_pset(ifc_product, "BaseQuantities","NetSideArea") 
-    
- 
-    
-    print (ifc_product.Name, area)
-
-
-
-for product in products:
-    get_ifc_quantities(ifc_product=product)
-
-
-
-def get_ifc_custom_propertyset(self, ifc_product):
-    print ('get ifc custom properties')
-
-
-class ConstructPandasDataFrame(bpy.types.Operator):
-
-    def execute():
-        print (' execute')
+    if ifc_product:
+        quantity_list.append(ifcopenshell.util.element.get_pset(ifc_product, "BaseQuantities","Area"))
+        quantity_list.append(ifcopenshell.util.element.get_pset(ifc_product, "BaseQuantities","NetArea"))
+        quantity_list.append(ifcopenshell.util.element.get_pset(ifc_product, "BaseQuantities","NetSideArea"))
         
+    if not quantity_list:
+        quantity_list.append(None)
+    
+    
+    return quantity_list
+
+
+def get_ifc_custom_propertyset(ifc_product, ifc_propertyset_name, ifc_property_name):
+    
+    custom_property_list  = []
+    
+    if ifc_product:
+        custom_property_list.append(ifcopenshell.util.element.get_pset(ifc_product, ifc_propertyset_name,ifc_property_name))
+        
+    if not custom_property_list:
+        custom_property_list.append(None)
+        
+    return custom_property_list
+    
+
+
+
+
+class ConstructPandasDataFrame:
+
+    def construct_dataframe(self):
+        
+        ifc_dictionary = defaultdict(list)
+        
+        for product in products:
+            if product:
+                ifc_dictionary['GlobalId'].append(str(product.GlobalId))
+                ifc_dictionary['Name'].append(str(product.Name))
+                ifc_dictionary['Type'].append(str(get_ifc_type(ifc_product=product)[0]))
+                ifc_dictionary['IfcBuildingStorey'].append(get_ifc_building_storey(ifc_product=product)[0])
+                ifc_dictionary['Classification'].append(get_ifc_classification_item_and_reference(ifc_product=product)[0])
+            
+        #print (ifc_dictionary)
+        
+        df = pd.DataFrame(ifc_dictionary)
+        self.df = df
+            
+            
+        print (df)
+
+data_frame = ConstructPandasDataFrame()            
+data_frame.construct_dataframe()     
         
 class WriteToXLSX(bpy.types.Operator):
 
