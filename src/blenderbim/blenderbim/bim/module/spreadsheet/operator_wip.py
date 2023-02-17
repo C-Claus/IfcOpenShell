@@ -101,86 +101,68 @@ def get_ifc_materials(ifc_product):
         material_list.append(None)
         
     return material_list
-    
 
-def get_ifc_properties(ifc_product):
-    #print ('get ifc propetysets and properties')
+
+def get_ifc_properties_and_quantities(ifc_product, ifc_propertyset_name, ifc_property_name):
     
-    property_set_common_list = []
-    property_name = 'IsExternal'
-    
-    #IsExternal
-    #LoadBearing
-    #FireRating
-    #AcousticRating
-    #Compartmentation
-    
-    #netside_area = ifcopenshell.util.element.get_pset(ifc_product, "Pset_WallCommon","IsExternal")
+    ifc_property_list = []
     
     if ifc_product:
-        if ifc_product.IsDefinedBy:
-            for ifc_reldefinesbyproperties in ifc_product.IsDefinedBy:
-                if ifc_reldefinesbyproperties.is_a() == 'IfcRelDefinesByProperties':
-                    if ifc_reldefinesbyproperties.RelatingPropertyDefinition.is_a() == 'IfcPropertySet':
-                        if (ifc_reldefinesbyproperties.RelatingPropertyDefinition.Name).startswith('Pset_') and (ifc_reldefinesbyproperties.RelatingPropertyDefinition.Name).endswith('Common'):
-                            for ifc_property in ifc_reldefinesbyproperties.RelatingPropertyDefinition.HasProperties:
-                                
-                                if ifc_property.Name == property_name:
-                                    if ifc_property.NominalValue:
-                                        property_set_common_list.append(ifc_property.NominalValue[0])
-                                        
-    if not property_set_common_list:
-        property_set_common_list.append(None)
+        ifc_property_list.append(ifcopenshell.util.element.get_pset(ifc_product, ifc_propertyset_name,ifc_property_name))
         
-
-    return (property_set_common_list)                                   
-
-
-def get_ifc_quantities(ifc_product):
-  
-    quantity_list  = []
-    
-    if ifc_product:
-        quantity_list.append(ifcopenshell.util.element.get_pset(ifc_product, "BaseQuantities","Area"))
-        quantity_list.append(ifcopenshell.util.element.get_pset(ifc_product, "BaseQuantities","NetArea"))
-        quantity_list.append(ifcopenshell.util.element.get_pset(ifc_product, "BaseQuantities","NetSideArea"))
+    if not ifc_property_list:
+        ifc_property_list.append(None)
         
-    if not quantity_list:
-        quantity_list.append(None)
-    
-    
-    return quantity_list
-
-
-def get_ifc_custom_propertyset(ifc_product, ifc_propertyset_name, ifc_property_name):
-    
-    custom_property_list  = []
-    
-    if ifc_product:
-        custom_property_list.append(ifcopenshell.util.element.get_pset(ifc_product, ifc_propertyset_name,ifc_property_name))
-        
-    if not custom_property_list:
-        custom_property_list.append(None)
-        
-    return custom_property_list
-    
-
-
+    return ifc_property_list
 
 
 class ConstructPandasDataFrame:
-
+    
+    
     def construct_dataframe(self):
         
         ifc_dictionary = defaultdict(list)
         
+        is_external = 'IsExternal'
+        load_bearing = 'LoadBearing'
+        fire_rating = 'FireRating'
+        
         for product in products:
             if product:
+                ifc_pset_common = 'Pset_' +  (str(product.is_a()).replace('Ifc','')) + 'Common'
+                
+
                 ifc_dictionary['GlobalId'].append(str(product.GlobalId))
                 ifc_dictionary['Name'].append(str(product.Name))
                 ifc_dictionary['Type'].append(str(get_ifc_type(ifc_product=product)[0]))
                 ifc_dictionary['IfcBuildingStorey'].append(get_ifc_building_storey(ifc_product=product)[0])
                 ifc_dictionary['Classification'].append(get_ifc_classification_item_and_reference(ifc_product=product)[0])
+                
+                ifc_dictionary[is_external].append(get_ifc_properties_and_quantities(ifc_product=product,
+                                                                                ifc_propertyset_name=ifc_pset_common,
+                                                                                ifc_property_name=is_external)[0])
+                                                                                
+                ifc_dictionary[load_bearing].append(get_ifc_properties_and_quantities(ifc_product=product,
+                                                                                ifc_propertyset_name=ifc_pset_common,
+                                                                                ifc_property_name=load_bearing)[0])
+                                                                                
+                ifc_dictionary[fire_rating].append(get_ifc_properties_and_quantities(ifc_product=product,
+                                                                                ifc_propertyset_name=ifc_pset_common,
+                                                                                ifc_property_name=fire_rating)[0])
+                                                                                
+                                                                                
+                
+                ifc_dictionary['Area'].append(get_ifc_properties_and_quantities(ifc_product=product,
+                                                                                ifc_propertyset_name='BaseQuantities',
+                                                                                ifc_property_name='Area')[0])
+                                                                                
+                ifc_dictionary['NetArea'].append(get_ifc_properties_and_quantities(ifc_product=product,
+                                                                                ifc_propertyset_name='BaseQuantities',
+                                                                                ifc_property_name='NetArea')[0])
+                                                                                
+                ifc_dictionary['NetSideArea'].append(get_ifc_properties_and_quantities(ifc_product=product,
+                                                                                ifc_propertyset_name='BaseQuantities',
+                                                                                ifc_property_name='NetSideArea')[0])
             
         #print (ifc_dictionary)
         
