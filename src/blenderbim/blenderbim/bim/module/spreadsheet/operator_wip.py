@@ -116,53 +116,75 @@ def get_ifc_properties_and_quantities(ifc_product, ifc_propertyset_name, ifc_pro
     return ifc_property_list
 
 
+#these variables should all come from ui, prop, don't harcode them in operator
+global_id = 'GlobalId'
+ifc_product_is = 'IfcElement'
+ifc_name = 'Name'
+ifc_type = 'Type'
+ifc_buildingstorey = 'IfcBuildingStorey'
+ifc_classification = 'Classification'
+ifc_material = 'Material(s)'
+is_external = 'IsExternal'
+load_bearing = 'LoadBearing'
+fire_rating = 'FireRating'
+base_quantities = 'BaseQuantities'
+area = 'Area'
+netside_area = 'NetSideArea'
+net_area = 'NetArea'
+length = 'Length'
+width = 'Width'
+height = 'height'
+
+
+
 class ConstructPandasDataFrame:
     
-    
-    def construct_dataframe(self):
+    def __init__(self, context):
         
         ifc_dictionary = defaultdict(list)
-        
-        is_external = 'IsExternal'
-        load_bearing = 'LoadBearing'
-        fire_rating = 'FireRating'
         
         for product in products:
             if product:
                 ifc_pset_common = 'Pset_' +  (str(product.is_a()).replace('Ifc','')) + 'Common'
                 
 
-                ifc_dictionary['GlobalId'].append(str(product.GlobalId))
-                ifc_dictionary['Name'].append(str(product.Name))
-                ifc_dictionary['Type'].append(str(get_ifc_type(ifc_product=product)[0]))
-                ifc_dictionary['IfcBuildingStorey'].append(get_ifc_building_storey(ifc_product=product)[0])
-                ifc_dictionary['Classification'].append(get_ifc_classification_item_and_reference(ifc_product=product)[0])
+                ifc_dictionary[global_id].append(str(product.GlobalId))
+                ifc_dictionary[ifc_product_is].append(str(product.is_a()))
+                ifc_dictionary[ifc_name].append(str(product.Name))
+                ifc_dictionary[ifc_type].append(str(get_ifc_type(ifc_product=product)[0]))
+                ifc_dictionary[ifc_buildingstorey].append(get_ifc_building_storey(ifc_product=product)[0])
+                ifc_dictionary[ifc_classification].append(get_ifc_classification_item_and_reference(ifc_product=product)[0])
+                
+                
+                ifc_dictionary[ifc_material].append(get_ifc_materials(ifc_product=product)[0])
+               
                 
                 ifc_dictionary[is_external].append(get_ifc_properties_and_quantities(ifc_product=product,
-                                                                                ifc_propertyset_name=ifc_pset_common,
-                                                                                ifc_property_name=is_external)[0])
+                                                                                     ifc_propertyset_name=ifc_pset_common,
+                                                                                     ifc_property_name=is_external)[0])
                                                                                 
                 ifc_dictionary[load_bearing].append(get_ifc_properties_and_quantities(ifc_product=product,
-                                                                                ifc_propertyset_name=ifc_pset_common,
-                                                                                ifc_property_name=load_bearing)[0])
+                                                                                      ifc_propertyset_name=ifc_pset_common,
+                                                                                      ifc_property_name=load_bearing)[0])
                                                                                 
                 ifc_dictionary[fire_rating].append(get_ifc_properties_and_quantities(ifc_product=product,
-                                                                                ifc_propertyset_name=ifc_pset_common,
-                                                                                ifc_property_name=fire_rating)[0])
+                                                                                     ifc_propertyset_name=ifc_pset_common,
+                                                                                     ifc_property_name=fire_rating)[0])
                                                                                 
                                                                                 
-                
-                ifc_dictionary['Area'].append(get_ifc_properties_and_quantities(ifc_product=product,
-                                                                                ifc_propertyset_name='BaseQuantities',
-                                                                                ifc_property_name='Area')[0])
+                ifc_dictionary[area].append(get_ifc_properties_and_quantities(ifc_product=product,
+                                                                                ifc_propertyset_name=base_quantities,
+                                                                                ifc_property_name=area)[0])
                                                                                 
-                ifc_dictionary['NetArea'].append(get_ifc_properties_and_quantities(ifc_product=product,
-                                                                                ifc_propertyset_name='BaseQuantities',
-                                                                                ifc_property_name='NetArea')[0])
+                ifc_dictionary[net_area].append(get_ifc_properties_and_quantities(ifc_product=product,
+                                                                                   ifc_propertyset_name=base_quantities,
+                                                                                   ifc_property_name=net_area)[0])
                                                                                 
-                ifc_dictionary['NetSideArea'].append(get_ifc_properties_and_quantities(ifc_product=product,
-                                                                                ifc_propertyset_name='BaseQuantities',
-                                                                                ifc_property_name='NetSideArea')[0])
+                ifc_dictionary[netside_area].append(get_ifc_properties_and_quantities(ifc_product=product,
+                                                                                       ifc_propertyset_name=base_quantities,
+                                                                                       ifc_property_name=netside_area)[0])
+                                                                                       
+               
             
         #print (ifc_dictionary)
         
@@ -170,15 +192,25 @@ class ConstructPandasDataFrame:
         self.df = df
             
             
-        print (df)
+        #print (df)
 
-data_frame = ConstructPandasDataFrame()            
-data_frame.construct_dataframe()     
+   
         
-class WriteToXLSX(bpy.types.Operator):
+class WriteToXLSX():
 
-    def execute():
+    def execute(self, context):
         print (' execute')
+        
+        #data_frame = ConstructPandasDataFrame()            
+        #data_frame.construct_dataframe()  
+        
+        #df_builder = ConstructDataFrame(context)
+        #df = df_builder.create_dataframe()
+        
+        
+        
+        data_frame = ConstructPandasDataFrame(context)
+        data_frame.construct_dataframe()
 
 class WriteToODS(bpy.types.Operator):
 
@@ -199,3 +231,10 @@ class GetCustomCollection(bpy.types.Operator):
 
     def execute():
         print (' execute')
+        
+writer = WriteToXLSX()
+
+# Call the execute method with the context dictionary
+writer.execute(context)
+
+#overal self context tusssen plaatsen
